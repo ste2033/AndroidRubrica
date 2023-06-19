@@ -22,7 +22,9 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     private static String _FILENAME = "rubrica.txt";
-    private static File _FILE = new File(Environment.getExternalStorageDirectory() + "/" + File.separator + _FILENAME);
+    private static String _SDPATH = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+    private File _FILE = new File(_SDPATH + "/" + File.separator + _FILENAME);
 
 
     @Override
@@ -98,20 +100,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     private ArrayList<String> readFullFile() {
-        ArrayList<String> data = new ArrayList<String>();
+        ArrayList<String> data = new ArrayList<>();
 
         try {
-            FileInputStream fis = new FileInputStream(_FILE);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            FileInputStream fileInput = new FileInputStream(_FILE);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fileInput));
 
             String line;
             while ((line = reader.readLine()) != null) {
-                data.add(line);
+                if(line != ""){
+                    data.add(line);
+                }
             }
 
             reader.close();
-            fis.close();
-
+            fileInput.close();
         } catch (Exception e) {
             Snackbar.make(findViewById(R.id.relativeLayout), "Errore nella lettura del file!", Snackbar.LENGTH_LONG).show();
         }

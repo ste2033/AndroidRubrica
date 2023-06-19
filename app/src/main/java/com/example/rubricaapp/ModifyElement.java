@@ -24,6 +24,9 @@ public class ModifyElement extends AppCompatActivity {
     private ActivityModifyElementsBinding binding;
 
     private static String _FILENAME = "rubrica.txt";
+    private static String _SDPATH = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+    private File _FILE = new File(_SDPATH + "/" + File.separator + _FILENAME);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +43,7 @@ public class ModifyElement extends AppCompatActivity {
     }
 
 
-    public void salvaElemento(){
+    public void salvaElemento() {
         String codice = binding.codiceInput.getText().toString();
         String nome = binding.nomeInput.getText().toString();
         String telefono = binding.telefonoInput.getText().toString();
@@ -48,7 +51,7 @@ public class ModifyElement extends AppCompatActivity {
 
         //codice|nome|telefono|note
 
-        if(codice == "" || nome == "" || telefono == "" || note == ""){
+        if (codice == "" || nome == "" || telefono == "" || note == "") {
             Snackbar.make(findViewById(R.id.relativeLayout), "RIEMPIRE TUTTI I CAMPI!", Snackbar.LENGTH_LONG).show();
             return;
         }
@@ -56,12 +59,17 @@ public class ModifyElement extends AppCompatActivity {
         String whatToWrite = codice + "|" + nome + "|" + telefono + "|" + note + "|";
 
         try {
-            //NON FUNZIONA LA SCRITTURA
-            FileOutputStream fos = openFileOutput(_FILENAME, Context.MODE_PRIVATE);
-            PrintWriter writer = new PrintWriter(new OutputStreamWriter(fos));
-            writer.println(whatToWrite);
-            writer.close();
-            fos.close();
+            FileWriter fileWriter = new FileWriter(_FILE, true);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+            bufferedWriter.newLine();
+            bufferedWriter.append(whatToWrite);
+
+            bufferedWriter.flush();
+            fileWriter.flush();
+
+            bufferedWriter.close();
+            fileWriter.close();
 
             exit();
         } catch (Exception e) {
@@ -70,7 +78,7 @@ public class ModifyElement extends AppCompatActivity {
 
     }
 
-    public void cancellaElemento(){
+    public void cancellaElemento() {
 
         exit();
     }
