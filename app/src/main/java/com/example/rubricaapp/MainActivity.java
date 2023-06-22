@@ -7,7 +7,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.ListView;
 
 import com.example.rubricaapp.databinding.ActivityMainBinding;
 import com.google.android.material.snackbar.Snackbar;
@@ -19,6 +22,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
 
     private static String _FILENAME = "rubrica.txt";
@@ -26,28 +30,44 @@ public class MainActivity extends AppCompatActivity {
 
     private File _FILE = new File(_SDPATH + "/" + File.separator + _FILENAME);
 
+    public ArrayList<Rubrica> rubricaArrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
+            Log.d(TAG, "onCreate: Started.");
+            ListView mListView = (ListView) findViewById(R.id.listView);
+
+            ArrayList<Rubrica> peopleList = new ArrayList<>();
+            for(int i = 0; i<10;i++){
+                String intString = Integer.toString(i);
+
+                Rubrica nuovo = new Rubrica (intString,intString,intString,intString);
+                peopleList.add(nuovo);
+            }
+            //Add the Person objects to an ArrayList
+            RubricaListAdapter adapter = new RubricaListAdapter(this, R.layout.adapter_view_layout, peopleList);
+            mListView.setAdapter(adapter);
+
+        /*
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Log.d(TAG,"onCreate: Started");
+
         askForPermissions();
+
+        ListView rubricaViewList = findViewById(R.id.listView);
+
 
         //riempi la lista
         readFullFile();
 
-        binding.nuovoDatoButton.setOnClickListener(view -> aggiungiElemento());
-
-        binding.listCodice.setOnClickListener(view -> modificaElemento());
-
-        binding.listNome.setOnClickListener(view -> modificaElemento());
-
-        binding.listTelefono.setOnClickListener(view -> modificaElemento());
-
-        binding.listNote.setOnClickListener(view -> modificaElemento());
+        binding.nuovoDatoButton.setOnClickListener(view -> aggiungiElemento());*/
     }
 
     public void aggiungiElemento() {
@@ -57,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         readFullFile();
     }
 
-    public void modificaElemento() {
+    public void modificaElemento(View view) {
         Intent intent = new Intent(this, ModifyElement.class);
         startActivity(intent);
 
@@ -99,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private ArrayList<String> readFullFile() {
-        ArrayList<String> data = new ArrayList<>();
+    private void readFullFile() {
+        rubricaArrayList = new ArrayList<>();
 
         try {
             FileInputStream fileInput = new FileInputStream(_FILE);
@@ -109,7 +129,9 @@ public class MainActivity extends AppCompatActivity {
             String line;
             while ((line = reader.readLine()) != null) {
                 if(line != ""){
-                    data.add(line);
+                    String[] data = line.split("|");
+                    Rubrica rubrica = new Rubrica(data[0],data[1],data[2],data[3]);
+                    rubricaArrayList.add(rubrica);
                 }
             }
 
@@ -118,8 +140,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Snackbar.make(findViewById(R.id.relativeLayout), "Errore nella lettura del file!", Snackbar.LENGTH_LONG).show();
         }
-
-        return data;
     }
 
 }

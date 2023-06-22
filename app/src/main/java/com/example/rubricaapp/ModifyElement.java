@@ -17,8 +17,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
 
 public class ModifyElement extends AppCompatActivity {
     private ActivityModifyElementsBinding binding;
@@ -28,6 +30,9 @@ public class ModifyElement extends AppCompatActivity {
 
     private File _FILE = new File(_SDPATH + "/" + File.separator + _FILENAME);
 
+    private Boolean _DAMODIFICARE = false;
+    private int _INDEX;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
@@ -36,10 +41,10 @@ public class ModifyElement extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.saveButton.setOnClickListener(view -> salvaElemento());
-
         binding.cancelButton.setOnClickListener(view -> exit());
-
         binding.deleteButton.setOnClickListener(view -> cancellaElemento());
+
+
     }
 
 
@@ -51,31 +56,40 @@ public class ModifyElement extends AppCompatActivity {
 
         //codice|nome|telefono|note
 
-        if (codice == "" || nome == "" || telefono == "" || note == "") {
+        if (codice.isEmpty() || nome.isEmpty() || telefono.isEmpty() || note.isEmpty()) {
             Snackbar.make(findViewById(R.id.relativeLayout), "RIEMPIRE TUTTI I CAMPI!", Snackbar.LENGTH_LONG).show();
-            return;
+        } else {
+
+            codice = codice.replaceAll("\n", "§");
+            nome = nome.replaceAll("\n", "§");
+            telefono = telefono.replaceAll("\n", "§");
+            note = note.replaceAll("\n", "§");
+
+
+            String whatToWrite = codice + "|" + nome + "|" + telefono + "|" + note + "|";
+
+
+            if (_DAMODIFICARE == true) {
+
+            } else {
+                try {
+                    OutputStream outputStream = new FileOutputStream(_FILE, true);
+                    Writer writer = new OutputStreamWriter(outputStream, "UTF-8");
+
+                    writer.append(whatToWrite);
+
+                    writer.flush();
+                    outputStream.flush();
+
+                    writer.close();
+                    outputStream.close();
+
+                    exit();
+                } catch (Exception e) {
+                    Snackbar.make(findViewById(R.id.relativeLayout), "La scrittura del file è andata male!", Snackbar.LENGTH_LONG).show();
+                }
+            }
         }
-
-        String whatToWrite = codice + "|" + nome + "|" + telefono + "|" + note + "|";
-
-        try {
-            FileWriter fileWriter = new FileWriter(_FILE, true);
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-            bufferedWriter.newLine();
-            bufferedWriter.append(whatToWrite);
-
-            bufferedWriter.flush();
-            fileWriter.flush();
-
-            bufferedWriter.close();
-            fileWriter.close();
-
-            exit();
-        } catch (Exception e) {
-            Snackbar.make(findViewById(R.id.relativeLayout), "La scrittura del file è andata male!", Snackbar.LENGTH_LONG).show();
-        }
-
     }
 
     public void cancellaElemento() {

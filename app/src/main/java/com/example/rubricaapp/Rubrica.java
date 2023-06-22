@@ -1,10 +1,18 @@
 package com.example.rubricaapp;
 
-public class ListModel {
+public class Rubrica {
     private String codice = "";
     private String nome = "";
     private String telefono = "";
     private String note = "";
+
+
+    public Rubrica(String codice, String nome, String telefono, String note) {
+        this.codice = codice;
+        this.nome = nome;
+        this.telefono = telefono;
+        this.note = note;
+    }
 
 
     public String getCodice() {
