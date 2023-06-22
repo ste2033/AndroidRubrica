@@ -31,8 +31,53 @@
                 android:textSize="30dp"></Button>
         </LinearLayout>
 
-        <!--Lista con i dati della rubrica-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#eee">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_weight="2"
+                android:text="Codice"
+                android:textSize="30dp"
+                android:textAllCaps="true">
+            </TextView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_weight="2"
+                android:text="Nome"
+                android:textSize="30dp"
+                android:textAllCaps="true">
+            </TextView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_weight="2"
+                android:text="Telefono"
+                android:textSize="30dp"
+                android:textAllCaps="true">
+            </TextView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_weight="2"
+                android:text="Note"
+                android:textSize="30dp"
+                android:textAllCaps="true">
+            </TextView>
+        </LinearLayout>
+
+        <!--Lista con i dati della rubrica-->
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
