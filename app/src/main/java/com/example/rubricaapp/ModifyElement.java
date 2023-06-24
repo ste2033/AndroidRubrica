@@ -2,24 +2,17 @@ package com.example.rubricaapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.WindowManager;
-import android.widget.EditText;
 
-import com.example.rubricaapp.databinding.ActivityMainBinding;
 import com.example.rubricaapp.databinding.ActivityModifyElementsBinding;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Writer;
 
 public class ModifyElement extends AppCompatActivity {
@@ -27,24 +20,25 @@ public class ModifyElement extends AppCompatActivity {
 
     private static String _FILENAME = "rubrica.txt";
     private static String _SDPATH = Environment.getExternalStorageDirectory().getAbsolutePath();
-
     private File _FILE = new File(_SDPATH + "/" + File.separator + _FILENAME);
 
-    private Boolean _DAMODIFICARE = false;
-    private int _INDEX;
+    private Boolean _daModificare;
+    private int _index;
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle bundle) {
+
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-        super.onCreate(savedInstanceState);
+        super.onCreate(bundle);
         binding = ActivityModifyElementsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        loadElements();
 
         binding.saveButton.setOnClickListener(view -> salvaElemento());
         binding.cancelButton.setOnClickListener(view -> exit());
         binding.deleteButton.setOnClickListener(view -> cancellaElemento());
-
-
     }
 
 
@@ -56,10 +50,11 @@ public class ModifyElement extends AppCompatActivity {
 
         //codice|nome|telefono|note
 
-        if (codice.isEmpty() || nome.isEmpty() || telefono.isEmpty() || note.isEmpty()) {
+        if (codice.isEmpty() == true || nome.isEmpty() == true || telefono.isEmpty() == true || note.isEmpty() == true) {
             Snackbar.make(findViewById(R.id.relativeLayout), "RIEMPIRE TUTTI I CAMPI!", Snackbar.LENGTH_LONG).show();
-        } else {
-
+        }
+        else
+        {
             codice = codice.replaceAll("\n", "§");
             nome = nome.replaceAll("\n", "§");
             telefono = telefono.replaceAll("\n", "§");
@@ -68,10 +63,11 @@ public class ModifyElement extends AppCompatActivity {
 
             String whatToWrite = codice + "|" + nome + "|" + telefono + "|" + note + "|";
 
-
-            if (_DAMODIFICARE == true) {
-
-            } else {
+            if (false) {
+                //prendi l'id dell'elemento nella lista e modificalo
+            }
+            else
+            {
                 try {
                     OutputStream outputStream = new FileOutputStream(_FILE, true);
                     Writer writer = new OutputStreamWriter(outputStream, "UTF-8");
@@ -100,5 +96,22 @@ public class ModifyElement extends AppCompatActivity {
 
     public void exit() {
         finish();
+    }
+
+    private void searchElement(){
+
+    }
+
+    private void loadElements() {
+        this._daModificare = getIntent().getBooleanExtra("daModificare",false);
+
+        if(this._daModificare == true) {
+            searchElement();
+
+            binding.codiceInput.setText("");
+            binding.nomeInput.setText("");
+            binding.telefonoInput.setText("");
+            binding.noteInput.setText("");
+        }
     }
 }

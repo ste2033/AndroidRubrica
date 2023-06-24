@@ -43,9 +43,14 @@
                 android:layout_weight="2"
                 android:text="Codice"
                 android:textSize="30dp"
+                android:background="@color/material_dynamic_secondary90"
                 android:textAllCaps="true">
             </TextView>
-
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="match_parent"
+                android:background="@color/black">
+            </Space>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -53,9 +58,14 @@
                 android:layout_weight="2"
                 android:text="Nome"
                 android:textSize="30dp"
+                android:background="@color/material_dynamic_secondary90"
                 android:textAllCaps="true">
             </TextView>
-
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="match_parent"
+                android:background="@color/black">
+            </Space>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -63,9 +73,14 @@
                 android:layout_weight="2"
                 android:text="Telefono"
                 android:textSize="30dp"
+                android:background="@color/material_dynamic_secondary90"
                 android:textAllCaps="true">
             </TextView>
-
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="match_parent"
+                android:background="@color/black">
+            </Space>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -73,6 +88,7 @@
                 android:layout_weight="2"
                 android:text="Note"
                 android:textSize="30dp"
+                android:background="@color/material_dynamic_secondary90"
                 android:textAllCaps="true">
             </TextView>
         </LinearLayout>
