@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:fitsSystemWindows="true"
-    android:id="@+id/relativeLayout">
+    android:id="@+id/relativeLayout"
+    android:requestLegacyExternalStorage="true">
 
     <LinearLayout
         android:id="@+id/linearLayout"

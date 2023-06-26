@@ -8,16 +8,15 @@
 
 
     <!--Per leggere i dati dalla memoria ESTERNA-->
-    <uses-permission  android:name="android.permission.MANAGE_EXTERNAL_STORAGE"></uses-permission>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"></uses-permission>
 
 
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/new_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.RubricaApp"
         tools:targetApi="31">
