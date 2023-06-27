@@ -15,20 +15,29 @@ import com.example.rubricaapp.databinding.ActivityModifyElementsBinding;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.io.Writer;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ModifyElement extends AppCompatActivity {
     private ActivityModifyElementsBinding binding;
 
-    private static String _FILENAME = "rubrica.txt";
+    private final String _CHARSET = "UTF-8";
+    private final String _FILENAME = "rubrica.txt";
+    private final String _TEMPFILE = "tempFile";
     private File _FILE = new File("");
 
     private Boolean _daModificare;
@@ -69,39 +78,37 @@ public class ModifyElement extends AppCompatActivity {
 
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    FileInputStream fileInput = new FileInputStream(_FILE);
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(fileInput));
 
-                    OutputStream outputStream = new FileOutputStream(_FILE, true);
-                    Writer writer = new OutputStreamWriter(outputStream, "UTF-8");
+                    File temp = File.createTempFile(_TEMPFILE, ".txt", _FILE.getParentFile());
 
-                    String line;
-                    while ((line = reader.readLine()) != null) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(_FILE), _CHARSET));
+                    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(temp), _CHARSET));
+
+                    for (String line; (line = reader.readLine()) != null;) {
                         line = line.replace(_oldValue, whatToWrite);
-                        writer.append(line);
+                        writer.println(line);
                     }
 
                     reader.close();
-                    writer.flush();
-                    outputStream.flush();
-
                     writer.close();
-                    outputStream.close();
+
+                    _FILE.delete();
+
+                    temp.renameTo(_FILE);
 
                     finish();
                 }
             } catch (Exception e) {
-                Snackbar.make(findViewById(R.id.relativeLayout), "Errore nella lettura del file!", Snackbar.LENGTH_LONG)
+                Snackbar.make(findViewById(R.id.relativeLayout), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG)
                         .show();
             }
-
         } else {
             try {
                 OutputStream outputStream = new FileOutputStream(_FILE, true);
-                Writer writer = new OutputStreamWriter(outputStream, "UTF-8");
+                Writer writer = new OutputStreamWriter(outputStream, _CHARSET);
 
-                writer.append("\n");
                 writer.append(whatToWrite);
+                writer.append("\n");
 
                 writer.flush();
                 outputStream.flush();
@@ -111,7 +118,7 @@ public class ModifyElement extends AppCompatActivity {
 
                 finish();
             } catch (Exception e) {
-                Snackbar.make(findViewById(R.id.relativeLayout), "La scrittura del file è andata male!",
+                Snackbar.make(findViewById(R.id.relativeLayout), "ERRORE IN FASE DI SCRITTURA!",
                         Snackbar.LENGTH_LONG).show();
             }
         }
@@ -119,54 +126,51 @@ public class ModifyElement extends AppCompatActivity {
 
     public void cancellaElemento() {
 
-        if (this._daModificare == true) {
-
+        if (this._daModificare == true)
+        {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    FileInputStream fileInput = new FileInputStream(_FILE);
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(fileInput));
 
-                    OutputStream outputStream = new FileOutputStream(_FILE, true);
-                    Writer writer = new OutputStreamWriter(outputStream, "UTF-8");
+                    File temp = File.createTempFile(_TEMPFILE, ".txt", _FILE.getParentFile());
 
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        line = "";
-                        writer.write(line);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(_FILE), _CHARSET));
+                    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(temp), _CHARSET));
+
+                    for (String line; (line = reader.readLine()) != null;) {
+                        line = line.replace(_oldValue, "");
+                        writer.println(line);
                     }
 
                     reader.close();
-                    writer.flush();
-                    outputStream.flush();
-
                     writer.close();
-                    outputStream.close();
 
-                    exit();
+                    _FILE.delete();
+
+                    temp.renameTo(_FILE);
+
+                    finish();
                 }
             } catch (Exception e) {
-                Snackbar.make(findViewById(R.id.relativeLayout), "Errore nella lettura del file!", Snackbar.LENGTH_LONG)
+                Snackbar.make(findViewById(R.id.relativeLayout), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG)
                         .show();
             }
-
         }
 
         finish();
     }
 
+    /*todo: Need to check if value is empty (otherwhise do nothing)
+    *  Refactoring*/
+
+
     public void exit() {
         finish();
-    }
-
-    private void searchElement() {
-
     }
 
     private void loadElements() {
         this._daModificare = getIntent().getBooleanExtra("daModificare", false);
 
         if (this._daModificare == true) {
-            searchElement();
 
             binding.codiceInput.setText(getIntent().getStringExtra("codice"));
             binding.nomeInput.setText(getIntent().getStringExtra("nome"));

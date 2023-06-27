@@ -34,9 +34,8 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class MainActivity extends AppCompatActivity {
-    private ActivityMainBinding binding;
 
-    private static String _FILENAME = "rubrica.txt";
+    private final String _FILENAME = "rubrica.txt";
     private File _FILE = new File("");
 
     public ArrayList<Rubrica> _rubricaArrayList = new ArrayList<>();
@@ -122,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 _FILE.createNewFile();
             } catch (Exception e) {
-                Snackbar.make(findViewById(R.id.relativeLayout), "Il file non è stato creato!", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(findViewById(R.id.relativeLayout), "ERRORE CREAZIONE FILE!", Snackbar.LENGTH_LONG).show();
             }
         }
     }
@@ -164,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 fileInput.close();
             }
         } catch (Exception e) {
-            Snackbar.make(findViewById(R.id.relativeLayout), "Errore nella lettura del file!", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(findViewById(R.id.relativeLayout), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG).show();
         }
 
 
