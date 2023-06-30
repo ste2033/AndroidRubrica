@@ -2,46 +2,36 @@ package com.example.rubricaapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
-import android.provider.Settings;
 import android.view.WindowManager;
 
 import com.example.rubricaapp.databinding.ActivityModifyElementsBinding;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.io.Writer;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ModifyElement extends AppCompatActivity {
     private ActivityModifyElementsBinding binding;
 
-    private final String _CHARSET = "UTF-8";
-    private final String _FILENAME = "rubrica.txt";
-    private final String _TEMPFILE = "tempFile";
-    private File _FILE = new File("");
+    private final String CHARSET = "UTF-8";
+    private final String FILENAME = "rubrica.txt";
+    private final String TEMPFILE = "tempFile";
+    private File FILE = new File("");
 
-    private Boolean _daModificare;
-    private String _oldValue;
+    private Boolean daModificare;
+    private String oldValue;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -51,7 +41,7 @@ public class ModifyElement extends AppCompatActivity {
         binding = ActivityModifyElementsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        loadElements();
+        caricaElemento();
 
         binding.saveButton.setOnClickListener(view -> salvaElemento());
         binding.cancelButton.setOnClickListener(view -> exit());
@@ -59,6 +49,92 @@ public class ModifyElement extends AppCompatActivity {
     }
 
     public void salvaElemento() {
+
+        String whatToWrite = pulisciData();
+
+        if(controllaValori(whatToWrite) == false){
+            Snackbar.make(findViewById(R.id.), "RIEMPIRE TUTTI I CAMPI!",Snackbar.LENGTH_LONG).show();
+        }
+        else{
+            if (this.daModificare == true) {
+                createTempFile(whatToWrite);
+            }
+            else
+            {
+                try {
+                    OutputStream outputStream = new FileOutputStream(FILE, true);
+                    Writer writer = new OutputStreamWriter(outputStream, CHARSET);
+
+                    writer.append(whatToWrite);
+                    writer.append("\n");
+
+                    writer.flush();
+                    outputStream.flush();
+
+                    writer.close();
+                    outputStream.close();
+
+                    finish();
+                } catch (Exception e) {
+                    Snackbar.make(findViewById(R.id.relativeLayout), "ERRORE IN FASE DI SCRITTURA!",
+                            Snackbar.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    public void cancellaElemento() {
+
+        if (this.daModificare == true) {
+            createTempFile("");
+        }
+
+        finish();
+    }
+
+    /*
+     * todo: Need to check if value is empty (otherwhise do nothing)
+     * Refactoring
+     */
+
+    public void exit() {
+        finish();
+    }
+
+    /*
+    * Carica tutti gli elementi e li scrive (se il dato è da modificare)
+    * */
+    private void caricaElemento() {
+        this.daModificare = getIntent().getBooleanExtra("daModificare", false);
+
+        if (this.daModificare == true) {
+
+            //i valori vengono passati come "extra"
+            //vengono presi, resi leggibili e settati negli appositi input
+            String codice = replaceText(getIntent().getStringExtra("codice"));
+            String nome = replaceText(getIntent().getStringExtra("nome"));
+            String telefono = replaceText(getIntent().getStringExtra("telefono"));
+            String note = replaceText(getIntent().getStringExtra("note"));
+
+            binding.codiceInput.setText(codice);
+            binding.nomeInput.setText(nome);
+            binding.telefonoInput.setText(telefono);
+            binding.noteInput.setText(note);
+
+            this.oldValue = codice + "|" + nome + "|" + telefono + "|" + note + "|";
+        }
+
+        //serve per indicare dove deve andare il file
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            StorageManager storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
+            List<StorageVolume> storageVolumeList = storageManager.getStorageVolumes();
+            StorageVolume storageVolume = storageVolumeList.get(1); // 1 is for external SD Card. 0 is
+            FILE = new File(storageVolume.getDirectory().getAbsolutePath() + "/" + FILENAME);
+        }
+    }
+
+
+    private String pulisciData(){
         String codice = binding.codiceInput.getText().toString();
         String nome = binding.nomeInput.getText().toString();
         String telefono = binding.telefonoInput.getText().toString();
@@ -66,130 +142,65 @@ public class ModifyElement extends AppCompatActivity {
 
         // codice|nome|telefono|note
 
-        codice = codice.replaceAll("\n", "§");
-        nome = nome.replaceAll("\n", "§");
-        telefono = telefono.replaceAll("\n", "§");
-        note = note.replaceAll("\n", "§");
+        codice = replaceText(codice);
+        nome = replaceText(nome);
+        telefono = replaceText(telefono);
+        note = replaceText(note);
 
         String whatToWrite = codice + "|" + nome + "|" + telefono + "|" + note + "|";
 
-        if (this._daModificare == true) {
-            // prendi l'id dell'elemento nella lista e modificalo
+        return whatToWrite;
+    }
 
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    private String replaceText(String stringaDaPulire){
+        String stringaPulita = stringaDaPulire.replaceAll("\n", "§");
 
-                    File temp = File.createTempFile(_TEMPFILE, ".txt", _FILE.getParentFile());
+        return stringaPulita;
+    }
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(_FILE), _CHARSET));
-                    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(temp), _CHARSET));
 
-                    for (String line; (line = reader.readLine()) != null;) {
-                        line = line.replace(_oldValue, whatToWrite);
-                        writer.println(line);
-                    }
+    private void createTempFile(String stringToReplace ){
 
-                    reader.close();
-                    writer.close();
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
-                    _FILE.delete();
+                File temp = File.createTempFile(TEMPFILE, ".txt", FILE.getParentFile());
 
-                    temp.renameTo(_FILE);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(FILE), CHARSET));
+                PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(temp), CHARSET));
 
-                    finish();
+                for (String line; (line = reader.readLine()) != null;) {
+                    line = line.replace(oldValue, stringToReplace);
+                    writer.println(line);
                 }
-            } catch (Exception e) {
-                Snackbar.make(findViewById(R.id.relativeLayout), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG)
-                        .show();
-            }
-        } else {
-            try {
-                OutputStream outputStream = new FileOutputStream(_FILE, true);
-                Writer writer = new OutputStreamWriter(outputStream, _CHARSET);
 
-                writer.append(whatToWrite);
-                writer.append("\n");
-
-                writer.flush();
-                outputStream.flush();
-
+                reader.close();
                 writer.close();
-                outputStream.close();
+
+                FILE.delete();
+
+                temp.renameTo(FILE);
 
                 finish();
-            } catch (Exception e) {
-                Snackbar.make(findViewById(R.id.relativeLayout), "ERRORE IN FASE DI SCRITTURA!",
-                        Snackbar.LENGTH_LONG).show();
             }
+        } catch (Exception e) {
+            Snackbar.make(findViewById(R.id.relativeLayout), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG)
+                    .show();
         }
+
     }
 
-    public void cancellaElemento() {
+    /**
+     * Controlla se la stringa contiene un valore vuoto
+     * Ritorna falso se la stringa è sbagliata
+     * Ritorna vero se la stringa è corretta
+     * */
+    private boolean controllaValori(String stringToCheck) {
 
-        if (this._daModificare == true)
-        {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-                    File temp = File.createTempFile(_TEMPFILE, ".txt", _FILE.getParentFile());
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(_FILE), _CHARSET));
-                    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(temp), _CHARSET));
-
-                    for (String line; (line = reader.readLine()) != null;) {
-                        line = line.replace(_oldValue, "");
-                        writer.println(line);
-                    }
-
-                    reader.close();
-                    writer.close();
-
-                    _FILE.delete();
-
-                    temp.renameTo(_FILE);
-
-                    finish();
-                }
-            } catch (Exception e) {
-                Snackbar.make(findViewById(R.id.relativeLayout), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG)
-                        .show();
-            }
+        if(stringToCheck.contains("||") == true){
+            return false;
         }
 
-        finish();
-    }
-
-    /*todo: Need to check if value is empty (otherwhise do nothing)
-    *  Refactoring*/
-
-
-    public void exit() {
-        finish();
-    }
-
-    private void loadElements() {
-        this._daModificare = getIntent().getBooleanExtra("daModificare", false);
-
-        if (this._daModificare == true) {
-
-            binding.codiceInput.setText(getIntent().getStringExtra("codice"));
-            binding.nomeInput.setText(getIntent().getStringExtra("nome"));
-            binding.telefonoInput.setText(getIntent().getStringExtra("telefono"));
-            binding.noteInput.setText(getIntent().getStringExtra("note"));
-
-            String codice = binding.codiceInput.getText().toString().replaceAll("\n", "§");
-            String nome = binding.nomeInput.getText().toString().replaceAll("\n", "§");
-            String telefono = binding.telefonoInput.getText().toString().replaceAll("\n", "§");
-            String note = binding.noteInput.getText().toString().replaceAll("\n", "§");
-
-            this._oldValue = codice + "|" + nome + "|" + telefono + "|" + note + "|";
-        }
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            StorageManager storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
-            List<StorageVolume> storageVolumeList = storageManager.getStorageVolumes();
-            StorageVolume storageVolume = storageVolumeList.get(1); // 1 is for external SD Card. 0 is
-            _FILE = new File(storageVolume.getDirectory().getAbsolutePath() + "/" + _FILENAME);
-        }
+        return true;
     }
 }

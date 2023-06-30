@@ -23,6 +23,8 @@ public class Rubrica {
         this.codice = codice;
     }
 
+    
+
     public String getNome() {
         return nome;
     }
@@ -31,6 +33,8 @@ public class Rubrica {
         this.nome = nome;
     }
 
+
+
     public String getTelefono() {
         return telefono;
     }
@@ -38,6 +42,8 @@ public class Rubrica {
     public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
+
+
 
     public String getNote() {
         return note;

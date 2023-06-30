@@ -1,42 +1,32 @@
 package com.example.rubricaapp;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.provider.Settings;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.rubricaapp.databinding.ActivityMainBinding;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String _FILENAME = "rubrica.txt";
-    private File _FILE = new File("");
+    private final String FILENAME = "rubrica.txt";
+    private File FILE = new File("");
 
     public ArrayList<Rubrica> _rubricaArrayList = new ArrayList<>();
 
@@ -46,23 +36,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        askForPermissions();
+        richiediPermessi();
 
-        //riempi la lista
-        readFullFile();
+        leggiFile();
 
         Button nuovoDato = findViewById(R.id.nuovoDatoButton);
         nuovoDato.setOnClickListener(view -> aggiungiElemento());
     }
 
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        //Calling this public method will prevent the android.support.v4.app.SuperNotCalledException
+        // when we don't immediately call the super.onDestroy - since it is in an endAction
+
+        finishAndRemoveTask();
+    }
+
     public void aggiungiElemento() {
         Intent intent = new Intent(getBaseContext(), ModifyElement.class);
-        intent.putExtra("daModificare",false);
 
         startActivity(intent);
 
-        readFullFile();
+        leggiFile();
     }
 
 
@@ -82,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         startActivity(intent);
 
-        readFullFile();
+        leggiFile();
     }
 
     @Override
@@ -92,11 +89,15 @@ public class MainActivity extends AppCompatActivity {
             if (Environment.isExternalStorageManager()) {
                 createFile();
             }
-            readFullFile();
+            leggiFile();
         }
     }
 
-    public void askForPermissions() {
+    /** Richiedi i permessi dell'applicazione
+     * I permessi riguardano lettura e scrittura
+     * su scheda SD
+     */
+    private void richiediPermessi() {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R)
         {
@@ -109,17 +110,20 @@ public class MainActivity extends AppCompatActivity {
             StorageManager storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
             List<StorageVolume> storageVolumeList = storageManager.getStorageVolumes();
             StorageVolume storageVolume = storageVolumeList.get(1); // 1 is for external SD Card. 0 is for internal memory
-            _FILE = new File(storageVolume.getDirectory().getAbsolutePath() +"/"+ _FILENAME);
+            FILE = new File(storageVolume.getDirectory().getAbsolutePath() +"/"+ FILENAME);
 
             createFile();
         }
     }
 
+    /**
+     * Crea il file (se non esiste già)
+     */
     public void createFile() {
-        if (!_FILE.exists())
+        if (!FILE.exists())
         {
             try {
-                _FILE.createNewFile();
+                FILE.createNewFile();
             } catch (Exception e) {
                 Snackbar.make(findViewById(R.id.relativeLayout), "ERRORE CREAZIONE FILE!", Snackbar.LENGTH_LONG).show();
             }
@@ -128,10 +132,10 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    /*
+    /**
      * Legge il file e riempie l'arrayList
      */
-    private void readFullFile() {
+    private void leggiFile() {
 
         ListView mListView = findViewById(R.id.listView);
         _rubricaArrayList = new ArrayList<>();
@@ -139,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             {
-                FileInputStream fileInput = new FileInputStream(_FILE);
+                FileInputStream fileInput = new FileInputStream(FILE);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(fileInput));
 
                 String line;
