@@ -9,7 +9,7 @@
     android:padding="20dp"
     android:fitsSystemWindows="true"
     tools:context=".ModifyElement"
-    android:id="ModifyElement"
+    android:id="@+id/ModificaElemento"
     android:requestLegacyExternalStorage="true"
     >
 

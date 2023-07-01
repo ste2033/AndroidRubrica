@@ -50,10 +50,21 @@ public class ModifyElement extends AppCompatActivity {
 
     public void salvaElemento() {
 
-        String whatToWrite = pulisciData();
+        String codice = binding.codiceInput.getText().toString();
+        String nome = binding.nomeInput.getText().toString();
+        String telefono = binding.telefonoInput.getText().toString();
+        String note = binding.noteInput.getText().toString();
 
-        if(controllaValori(whatToWrite) == false){
-            Snackbar.make(findViewById(R.id.), "RIEMPIRE TUTTI I CAMPI!",Snackbar.LENGTH_LONG).show();
+        codice = replaceText(codice);
+        nome = replaceText(nome);
+        telefono = replaceText(telefono);
+        note = replaceText(note);
+
+        // codice|nome|telefono|note
+        String whatToWrite = codice + "|" + nome + "|" + telefono + "|" + note + "|";
+
+        if(codice.equals("") == true || nome.equals("") == true || telefono.equals("") == true || note.equals("") == true){
+            Snackbar.make(this.getCurrentFocus(), "RIEMPIRE TUTTI I CAMPI!",Snackbar.LENGTH_LONG).show();
         }
         else{
             if (this.daModificare == true) {
@@ -76,8 +87,7 @@ public class ModifyElement extends AppCompatActivity {
 
                     finish();
                 } catch (Exception e) {
-                    Snackbar.make(findViewById(R.id.relativeLayout), "ERRORE IN FASE DI SCRITTURA!",
-                            Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(this.getCurrentFocus(), "ERRORE IN FASE DI SCRITTURA!", Snackbar.LENGTH_LONG).show();
                 }
             }
         }
@@ -91,11 +101,7 @@ public class ModifyElement extends AppCompatActivity {
 
         finish();
     }
-
-    /*
-     * todo: Need to check if value is empty (otherwhise do nothing)
-     * Refactoring
-     */
+    
 
     public void exit() {
         finish();
@@ -128,30 +134,19 @@ public class ModifyElement extends AppCompatActivity {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             StorageManager storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
             List<StorageVolume> storageVolumeList = storageManager.getStorageVolumes();
-            StorageVolume storageVolume = storageVolumeList.get(1); // 1 is for external SD Card. 0 is
+            StorageVolume storageVolume = storageVolumeList.get(1); // 1 is for external SD Card. 0 is internal storage
+
             FILE = new File(storageVolume.getDirectory().getAbsolutePath() + "/" + FILENAME);
         }
     }
 
 
-    private String pulisciData(){
-        String codice = binding.codiceInput.getText().toString();
-        String nome = binding.nomeInput.getText().toString();
-        String telefono = binding.telefonoInput.getText().toString();
-        String note = binding.noteInput.getText().toString();
-
-        // codice|nome|telefono|note
-
-        codice = replaceText(codice);
-        nome = replaceText(nome);
-        telefono = replaceText(telefono);
-        note = replaceText(note);
-
-        String whatToWrite = codice + "|" + nome + "|" + telefono + "|" + note + "|";
-
-        return whatToWrite;
-    }
-
+    /**
+     * Cambia tutti i
+     * \n
+     * con un
+     * §
+     **/
     private String replaceText(String stringaDaPulire){
         String stringaPulita = stringaDaPulire.replaceAll("\n", "§");
 
@@ -159,6 +154,9 @@ public class ModifyElement extends AppCompatActivity {
     }
 
 
+    /**
+     * Crea un file temporaneo dove salvare i dati
+     * */
     private void createTempFile(String stringToReplace ){
 
         try {
@@ -184,23 +182,9 @@ public class ModifyElement extends AppCompatActivity {
                 finish();
             }
         } catch (Exception e) {
-            Snackbar.make(findViewById(R.id.relativeLayout), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG)
-                    .show();
+            Snackbar.make(this.getCurrentFocus(), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG).show();
         }
 
     }
 
-    /**
-     * Controlla se la stringa contiene un valore vuoto
-     * Ritorna falso se la stringa è sbagliata
-     * Ritorna vero se la stringa è corretta
-     * */
-    private boolean controllaValori(String stringToCheck) {
-
-        if(stringToCheck.contains("||") == true){
-            return false;
-        }
-
-        return true;
-    }
 }

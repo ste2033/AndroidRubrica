@@ -26,8 +26,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private final String FILENAME = "rubrica.txt";
-    private File FILE = new File("");
-
+    private File _file = new File("");
     public ArrayList<Rubrica> _rubricaArrayList = new ArrayList<>();
 
     @Override
@@ -54,28 +53,24 @@ public class MainActivity extends AppCompatActivity {
         finishAndRemoveTask();
     }
 
+
+    /**
+     * Chiamato quando viene cliccato il bottone di aggiunta elemento
+     * */
     public void aggiungiElemento() {
-        Intent intent = new Intent(getBaseContext(), ModifyElement.class);
+        Intent intent = new Intent(this,  ModifyElement.class);
 
         startActivity(intent);
 
         leggiFile();
     }
 
-
+    /**
+     * Chiamato quando viene cliccato un elemento già esistente
+     */
     public void modificaElemento(View view) {
         Intent intent = new Intent(this,  ModifyElement.class);
-        intent.putExtra("daModificare", true);
-
-        String codice = ((TextView) view.findViewById(R.id.listCodice)).getText().toString();
-        String nome = ((TextView) view.findViewById(R.id.listNome)).getText().toString();
-        String telefono = ((TextView) view.findViewById(R.id.listTelefono)).getText().toString();
-        String note = ((TextView) view.findViewById(R.id.listNote)).getText().toString();
-
-        intent.putExtra("codice", codice);
-        intent.putExtra("nome", nome);
-        intent.putExtra("telefono", telefono);
-        intent.putExtra("note", note);
+        intent = fillIntent(view, intent);
 
         startActivity(intent);
 
@@ -110,26 +105,27 @@ public class MainActivity extends AppCompatActivity {
             StorageManager storageManager = (StorageManager) getSystemService(STORAGE_SERVICE);
             List<StorageVolume> storageVolumeList = storageManager.getStorageVolumes();
             StorageVolume storageVolume = storageVolumeList.get(1); // 1 is for external SD Card. 0 is for internal memory
-            FILE = new File(storageVolume.getDirectory().getAbsolutePath() +"/"+ FILENAME);
+
+            _file = new File(storageVolume.getDirectory().getAbsolutePath() +"/"+ FILENAME);
 
             createFile();
         }
     }
 
+
     /**
      * Crea il file (se non esiste già)
      */
     public void createFile() {
-        if (!FILE.exists())
+        if (_file.exists() == false)
         {
             try {
-                FILE.createNewFile();
+                _file.createNewFile();
             } catch (Exception e) {
-                Snackbar.make(findViewById(R.id.relativeLayout), "ERRORE CREAZIONE FILE!", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(this.getCurrentFocus(), "ERRORE CREAZIONE FILE!", Snackbar.LENGTH_LONG).show();
             }
         }
     }
-
 
 
     /**
@@ -137,13 +133,13 @@ public class MainActivity extends AppCompatActivity {
      */
     private void leggiFile() {
 
-        ListView mListView = findViewById(R.id.listView);
+        ListView listViewInput = findViewById(R.id.listView);
         _rubricaArrayList = new ArrayList<>();
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             {
-                FileInputStream fileInput = new FileInputStream(FILE);
+                FileInputStream fileInput = new FileInputStream(_file);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(fileInput));
 
                 String line;
@@ -167,11 +163,28 @@ public class MainActivity extends AppCompatActivity {
                 fileInput.close();
             }
         } catch (Exception e) {
-            Snackbar.make(findViewById(R.id.relativeLayout), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(this.getCurrentFocus(), "LETTURA DEL FILE FALLITA!", Snackbar.LENGTH_LONG).show();
         }
 
 
         RubricaListAdapter adapter = new RubricaListAdapter(this, R.layout.adapter_view_layout, this._rubricaArrayList);
-        mListView.setAdapter(adapter);
+        listViewInput.setAdapter(adapter);
+    }
+
+    private Intent fillIntent(View view, Intent intent){
+
+        intent.putExtra("daModificare", true);
+
+        String codice = ((TextView) view.findViewById(R.id.listCodice)).getText().toString();
+        String nome = ((TextView) view.findViewById(R.id.listNome)).getText().toString();
+        String telefono = ((TextView) view.findViewById(R.id.listTelefono)).getText().toString();
+        String note = ((TextView) view.findViewById(R.id.listNote)).getText().toString();
+
+        intent.putExtra("codice", codice);
+        intent.putExtra("nome", nome);
+        intent.putExtra("telefono", telefono);
+        intent.putExtra("note", note);
+
+        return intent;
     }
 }
